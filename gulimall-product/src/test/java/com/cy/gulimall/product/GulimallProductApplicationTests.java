@@ -1,12 +1,18 @@
 package com.cy.gulimall.product;
 
 
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSClientBuilder;
+import com.aliyun.oss.OSSException;
+import com.aliyun.oss.model.PutObjectRequest;
+import com.aliyun.oss.model.PutObjectResult;
 import com.cy.gulimall.product.dao.AttrGroupDao;
 import com.cy.gulimall.product.dao.SkuSaleAttrValueDao;
 import com.cy.gulimall.product.entity.BrandEntity;
 import com.cy.gulimall.product.service.BrandService;
 import com.cy.gulimall.product.service.SkuSaleAttrValueService;
 import com.cy.gulimall.product.vo.SkuItemVo;
+import com.netflix.client.ClientException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.redisson.api.RedissonClient;
@@ -14,6 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
@@ -50,11 +59,11 @@ public class GulimallProductApplicationTests {
 //    private OSS ossClient;
 //    @Test
 //    public void testUpdate() throws FileNotFoundException {
-////        // Endpoint以华东1（杭州）为例，其它Region请按实际情况填写。
-////        String endpoint = "oss-cn-beijing.aliyuncs.com";
-////        // 阿里云账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM用户进行API访问或日常运维，请登录RAM控制台创建RAM用户。
-////        String accessKeyId = "";
-////        String accessKeySecret = "";
+//        // Endpoint以华东1（杭州）为例，其它Region请按实际情况填写。
+//        String endpoint = "oss-cn-beijing.aliyuncs.com";
+//        // 阿里云账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM用户进行API访问或日常运维，请登录RAM控制台创建RAM用户。
+//        String accessKeyId = "LTAI5t9LdJDecCoZDoZoqBbVv";
+//        String accessKeySecret = "ygXzaZ3DCxuS5h456gTKD3mXjPKIRx";
 //        // 填写Bucket名称，例如examplebucket。
 //        String bucketName = "cyjoker-edu";
 //        // 填写Object完整路径，完整路径中不能包含Bucket名称，例如exampledir/exampleobject.txt。
@@ -64,7 +73,7 @@ public class GulimallProductApplicationTests {
 //        String filePath= "C:\\Users\\chen'yi\\OneDrive\\桌面\\OIP.jpg";
 //
 //        // 创建OSSClient实例。
-////        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+//        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
 //
 //        try {
 //            InputStream inputStream = new FileInputStream(filePath);

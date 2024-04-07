@@ -2,7 +2,6 @@ package com.cy.gulimall.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cy.common.constant.ProductConstant;
 import com.cy.gulimall.product.dao.AttrAttrgroupRelationDao;
 import com.cy.gulimall.product.dao.AttrGroupDao;
@@ -55,7 +54,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<AttrEntity> page = this.page(
                 new Query<AttrEntity>().getPage(params),
-                new QueryWrapper<AttrEntity>()
+                new QueryWrapper<>()
         );
 
         return new PageUtils(page);
@@ -88,9 +87,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         queryWrapper.eq(AttrEntity::getAttrType, "base".equalsIgnoreCase(attrType) ? ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode() : ProductConstant.AttrEnum.ATTR_TYPE_SALE.getCode());
 
         if (StringUtils.hasText(key)) {
-            queryWrapper.and((obj) -> {
-                obj.eq(AttrEntity::getAttrId, key).or().like(AttrEntity::getAttrName, key);
-            });
+            queryWrapper.and((obj) -> obj.eq(AttrEntity::getAttrId, key).or().like(AttrEntity::getAttrName, key));
         }
         if (catelogId != 0) {
             queryWrapper.eq(AttrEntity::getCatelogId, catelogId);
@@ -189,10 +186,8 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         LambdaQueryWrapper<AttrAttrgroupRelationEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(AttrAttrgroupRelationEntity::getAttrGroupId, attrGounpId);
         List<AttrAttrgroupRelationEntity> entities = attrgroupRelationDao.selectList(queryWrapper);
-        List<Long> attrIds = entities.stream().map(attr -> {
-            return attr.getAttrId();
-        }).collect(Collectors.toList());
-        if (attrIds == null || attrIds.size() == 0) {
+        List<Long> attrIds = entities.stream().map(AttrAttrgroupRelationEntity::getAttrId).collect(Collectors.toList());
+        if (attrIds.isEmpty()) {
             return null;
         }
         return this.listByIds(attrIds);
@@ -200,7 +195,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
 
     @Override
     public void deleteRelation(AttrGounpRelationVo[] relationVo) {
-        List<AttrAttrgroupRelationEntity> entities = Arrays.asList(relationVo).stream().map((item) -> {
+        List<AttrAttrgroupRelationEntity> entities = Arrays.stream(relationVo).map((item) -> {
             AttrAttrgroupRelationEntity attrAttrgroupRelationEntity = new AttrAttrgroupRelationEntity();
             BeanUtils.copyProperties(item, attrAttrgroupRelationEntity);
             return attrAttrgroupRelationEntity;
@@ -220,33 +215,26 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         List<AttrGroupEntity> attrGroupEntities = attrGroupDao.selectList(new LambdaQueryWrapper<AttrGroupEntity>()
                 .eq(AttrGroupEntity::getCatelogId, catelogId));
 
-        List<Long> collect = attrGroupEntities.stream().map((item) -> {
-            return item.getAttrGroupId();
-        }).collect(Collectors.toList());
+        List<Long> collect = attrGroupEntities.stream().map(AttrGroupEntity::getAttrGroupId).collect(Collectors.toList());
 
         // 2,这些分组关联的属性
         List<AttrAttrgroupRelationEntity> groupId = attrgroupRelationDao.selectList(new LambdaQueryWrapper<AttrAttrgroupRelationEntity>()
                 .in(AttrAttrgroupRelationEntity::getAttrGroupId, collect));
 
-        List<Long> attrIds = groupId.stream().map((item) -> {
-            return item.getAttrId();
-        }).collect(Collectors.toList());
+        List<Long> attrIds = groupId.stream().map(AttrAttrgroupRelationEntity::getAttrId).collect(Collectors.toList());
 
         // 3,从当前分类移除这些属性
         LambdaQueryWrapper<AttrEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(AttrEntity::getCatelogId, catelogId);
-        queryWrapper.notIn(attrIds != null && attrIds.size() > 0, AttrEntity::getAttrId, attrIds)
+        queryWrapper.notIn(!attrIds.isEmpty(), AttrEntity::getAttrId, attrIds)
                 .eq(AttrEntity::getAttrType, ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode());
 
         String key = (String) params.get("key");
         if (StringUtils.hasText(key)) {
-            queryWrapper.and((obj) -> {
-                obj.eq(AttrEntity::getAttrId, key).or().like(AttrEntity::getAttrName, key);
-            });
+            queryWrapper.and((obj) -> obj.eq(AttrEntity::getAttrId, key).or().like(AttrEntity::getAttrName, key));
         }
         IPage<AttrEntity> page = this.page(new Query<AttrEntity>().getPage(params), queryWrapper);
-        PageUtils pageUtils = new PageUtils(page);
-        return pageUtils;
+        return new PageUtils(page);
     }
 
     @Override
