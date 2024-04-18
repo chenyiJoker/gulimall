@@ -2,12 +2,18 @@ package com.cy.gulimall.product.service.impl;
 
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cy.common.constant.ProductConstant;
 import com.cy.common.to.SkuHasStockVo;
 import com.cy.common.to.SkuReductionTo;
 import com.cy.common.to.SpuBoundsTo;
 import com.cy.common.to.es.SkuEsModel;
+import com.cy.common.utils.PageUtils;
+import com.cy.common.utils.Query;
 import com.cy.common.utils.R;
+import com.cy.gulimall.product.dao.SpuInfoDao;
 import com.cy.gulimall.product.entity.*;
 import com.cy.gulimall.product.feign.CouponFeignServcie;
 import com.cy.gulimall.product.feign.SearchFeignService;
@@ -17,20 +23,12 @@ import com.cy.gulimall.product.vo.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.cy.common.utils.PageUtils;
-import com.cy.common.utils.Query;
-
-import com.cy.gulimall.product.dao.SpuInfoDao;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 
 @Service("spuInfoService")
@@ -74,7 +72,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<SpuInfoEntity> page = this.page(
                 new Query<SpuInfoEntity>().getPage(params),
-                new QueryWrapper<SpuInfoEntity>()
+                new QueryWrapper<>()
         );
 
         return new PageUtils(page);
@@ -84,9 +82,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         LambdaQueryWrapper<SpuInfoEntity> queryWrapper = new LambdaQueryWrapper<>();
         String key = (String) params.get("key");
         if (StringUtils.hasText(key)) {
-            queryWrapper.and(obj -> {
-                obj.eq(SpuInfoEntity::getId, key).or().like(SpuInfoEntity::getSpuName, key);
-            });
+            queryWrapper.and(obj -> obj.eq(SpuInfoEntity::getId, key).or().like(SpuInfoEntity::getSpuName, key));
         }
         String status = (String) params.get("status");
         queryWrapper.eq(StringUtils.hasText(status), SpuInfoEntity::getPublishStatus, status);
@@ -165,9 +161,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                     skuImagesEntity.setImgUrl(img.getImgUrl());
                     skuImagesEntity.setDefaultImg(img.getDefaultImg());
                     return skuImagesEntity;
-                }).filter(item -> {
-                    return !StringUtils.isEmpty(item.getImgUrl());
-                }).collect(Collectors.toList());
+                }).filter(item -> !StringUtils.isEmpty(item.getImgUrl())).collect(Collectors.toList());
 
                 skuImagesService.saveBatch(collect);
 
@@ -176,7 +170,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 List<SkuSaleAttrValueEntity> saleAttrValueEntities = attr.stream().map(item -> {
                     SkuSaleAttrValueEntity skuSaleAttrValueEntity = new SkuSaleAttrValueEntity();
                     BeanUtils.copyProperties(item, skuSaleAttrValueEntity);
-                    skuSaleAttrValueEntity.setSkuId(skuInfoEntity.getSkuId());
+                    skuSaleAttrValueEntity.setSkuId(skuId);
                     return skuSaleAttrValueEntity;
                 }).collect(Collectors.toList());
 
@@ -185,8 +179,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 // 6.4 sku的优惠,满减等信息 gulimall_sms ->sms_sku_ladder sms_sku_full_reduction sms_member_price
                 SkuReductionTo skuReductionTo = new SkuReductionTo();
                 BeanUtils.copyProperties(sku, skuReductionTo);
-                skuReductionTo.setSkuId(skuInfoEntity.getSkuId());
-                if (skuReductionTo.getFullCount() > 0 || skuReductionTo.getFullPrice().compareTo(BigDecimal.ZERO) == 1) {
+                skuReductionTo.setSkuId(skuId);
+                if (skuReductionTo.getFullCount() > 0 || skuReductionTo.getFullPrice().compareTo(BigDecimal.ZERO) > 0) {
                     couponFeignServcie.saveSkuReduction(skuReductionTo);
                 }
             });
@@ -207,17 +201,13 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         List<ProductAttrValueEntity> listforspu = valueService.listforspu(spuId);
 
         List<Long> skuIds = skus.stream().map(SkuInfoEntity::getSkuId).collect(Collectors.toList());
-        List<Long> attrIds = listforspu.stream().map(attr -> {
-            return attr.getAttrId();
-        }).collect(Collectors.toList());
+        List<Long> attrIds = listforspu.stream().map(ProductAttrValueEntity::getAttrId).collect(Collectors.toList());
 
         List<Long> searchAttrIds = attrService.selectSearchAttrIds(attrIds);
 
         Set<Long> idSet = new HashSet<>(searchAttrIds);
 
-        List<SkuEsModel.Attrs> attrsList = listforspu.stream().filter(attr -> {
-            return idSet.contains(attr.getAttrId());
-        }).map(attr -> {
+        List<SkuEsModel.Attrs> attrsList = listforspu.stream().filter(attr -> idSet.contains(attr.getAttrId())).map(attr -> {
             SkuEsModel.Attrs attrs1 = new SkuEsModel.Attrs();
             BeanUtils.copyProperties(attr, attrs1);
             return attrs1;
@@ -230,7 +220,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             TypeReference<List<SkuHasStockVo>> typeReference = new TypeReference<List<SkuHasStockVo>>() {
             };
             stockMap = skuHasStock.getData(typeReference).stream()
-                    .collect(Collectors.toMap(SkuHasStockVo::getSkuId, item -> item.getHasStock()));
+                    .collect(Collectors.toMap(SkuHasStockVo::getSkuId, SkuHasStockVo::getHasStock));
 
         } catch (Exception e) {
             log.error("库存服务查询异常：原因{}", e);

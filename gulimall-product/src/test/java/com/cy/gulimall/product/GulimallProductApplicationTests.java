@@ -1,18 +1,10 @@
 package com.cy.gulimall.product;
 
-
-import com.aliyun.oss.OSS;
-import com.aliyun.oss.OSSClientBuilder;
-import com.aliyun.oss.OSSException;
-import com.aliyun.oss.model.PutObjectRequest;
-import com.aliyun.oss.model.PutObjectResult;
 import com.cy.gulimall.product.dao.AttrGroupDao;
 import com.cy.gulimall.product.dao.SkuSaleAttrValueDao;
 import com.cy.gulimall.product.entity.BrandEntity;
 import com.cy.gulimall.product.service.BrandService;
-import com.cy.gulimall.product.service.SkuSaleAttrValueService;
 import com.cy.gulimall.product.vo.SkuItemVo;
-import com.netflix.client.ClientException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.redisson.api.RedissonClient;
@@ -20,9 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.List;
 
 @RunWith(SpringRunner.class)

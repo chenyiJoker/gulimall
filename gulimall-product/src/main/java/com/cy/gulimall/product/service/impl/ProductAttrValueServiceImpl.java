@@ -1,27 +1,24 @@
 package com.cy.gulimall.product.service.impl;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.cy.gulimall.product.entity.AttrEntity;
-import com.cy.gulimall.product.service.AttrService;
-import com.cy.gulimall.product.vo.BaseAttrs;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cy.common.utils.PageUtils;
 import com.cy.common.utils.Query;
-
 import com.cy.gulimall.product.dao.ProductAttrValueDao;
+import com.cy.gulimall.product.entity.AttrEntity;
 import com.cy.gulimall.product.entity.ProductAttrValueEntity;
+import com.cy.gulimall.product.service.AttrService;
 import com.cy.gulimall.product.service.ProductAttrValueService;
+import com.cy.gulimall.product.vo.BaseAttrs;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service("productAttrValueService")
@@ -34,12 +31,13 @@ public class ProductAttrValueServiceImpl extends ServiceImpl<ProductAttrValueDao
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<ProductAttrValueEntity> page = this.page(
                 new Query<ProductAttrValueEntity>().getPage(params),
-                new QueryWrapper<ProductAttrValueEntity>()
+                new QueryWrapper<>()
         );
 
         return new PageUtils(page);
     }
 
+    @Transactional
     @Override
     public void saveBaseAttrs(Long id, List<BaseAttrs> baseAttrs) {
         if (!baseAttrs.isEmpty()) {
@@ -70,10 +68,7 @@ public class ProductAttrValueServiceImpl extends ServiceImpl<ProductAttrValueDao
         LambdaQueryWrapper<ProductAttrValueEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ProductAttrValueEntity::getSpuId, spuId);
         baseMapper.delete(queryWrapper);
-        List<ProductAttrValueEntity> collect = entities.stream().map(item -> {
-            item.setSpuId(spuId);
-            return item;
-        }).collect(Collectors.toList());
+        List<ProductAttrValueEntity> collect = entities.stream().peek(item -> item.setSpuId(spuId)).collect(Collectors.toList());
         this.saveBatch(collect);
     }
 

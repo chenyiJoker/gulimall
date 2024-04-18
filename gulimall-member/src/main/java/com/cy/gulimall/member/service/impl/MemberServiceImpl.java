@@ -3,12 +3,19 @@ package com.cy.gulimall.member.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.cy.common.exception.RRException;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cy.common.utils.HttpUtils;
+import com.cy.common.utils.PageUtils;
+import com.cy.common.utils.Query;
+import com.cy.gulimall.member.dao.MemberDao;
+import com.cy.gulimall.member.entity.MemberEntity;
 import com.cy.gulimall.member.entity.MemberLevelEntity;
 import com.cy.gulimall.member.exception.PhoneExistException;
 import com.cy.gulimall.member.exception.UserNameExistException;
 import com.cy.gulimall.member.service.MemberLevelService;
+import com.cy.gulimall.member.service.MemberService;
 import com.cy.gulimall.member.vo.MemberLoginVo;
 import com.cy.gulimall.member.vo.MemberRegisterVo;
 import com.cy.gulimall.member.vo.SocialUser;
@@ -19,19 +26,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.cy.common.utils.PageUtils;
-import com.cy.common.utils.Query;
-
-import com.cy.gulimall.member.dao.MemberDao;
-import com.cy.gulimall.member.entity.MemberEntity;
-import com.cy.gulimall.member.service.MemberService;
-import org.springframework.util.StringUtils;
 
 
 @Service("memberService")
@@ -44,7 +39,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<MemberEntity> page = this.page(
                 new Query<MemberEntity>().getPage(params),
-                new QueryWrapper<MemberEntity>()
+                new QueryWrapper<>()
         );
 
         return new PageUtils(page);
@@ -123,8 +118,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
 
                     member.setNickname(jsonObject.getString("name"));
                     member.setCreateTime(jsonObject.getDate("created_at"));
+                    member.setEmail(jsonObject.getString("email"));
+                    member.setHeader(jsonObject.getString("avatar_url"));
+
+                    MemberLevelEntity levelEntity = memberLevelService.getDefaultLevel();
+                    member.setLevelId(levelEntity.getId());
                 }
-            } catch (Exception e) {
+            } catch (Exception ignored) {
 
             }
             member.setSocialUid(user.getUid());

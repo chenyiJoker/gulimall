@@ -1,20 +1,18 @@
 package com.cy.gulimall.product.controller;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
+import com.cy.common.utils.PageUtils;
+import com.cy.common.utils.R;
 import com.cy.gulimall.product.entity.ProductAttrValueEntity;
+import com.cy.gulimall.product.service.AttrService;
 import com.cy.gulimall.product.service.ProductAttrValueService;
 import com.cy.gulimall.product.vo.AttrRespVo;
 import com.cy.gulimall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.cy.gulimall.product.entity.AttrEntity;
-import com.cy.gulimall.product.service.AttrService;
-import com.cy.common.utils.PageUtils;
-import com.cy.common.utils.R;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 
 /**

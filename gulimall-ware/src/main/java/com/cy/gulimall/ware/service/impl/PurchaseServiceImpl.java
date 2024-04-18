@@ -1,32 +1,29 @@
 package com.cy.gulimall.ware.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cy.common.constant.WareConstant;
+import com.cy.common.utils.PageUtils;
+import com.cy.common.utils.Query;
+import com.cy.gulimall.ware.dao.PurchaseDao;
 import com.cy.gulimall.ware.entity.PurchaseDetailEntity;
+import com.cy.gulimall.ware.entity.PurchaseEntity;
 import com.cy.gulimall.ware.service.PurchaseDetailService;
+import com.cy.gulimall.ware.service.PurchaseService;
 import com.cy.gulimall.ware.service.WareSkuService;
 import com.cy.gulimall.ware.vo.ItemVo;
 import com.cy.gulimall.ware.vo.MergeVo;
 import com.cy.gulimall.ware.vo.PurchaseDoneVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.cy.common.utils.PageUtils;
-import com.cy.common.utils.Query;
-
-import com.cy.gulimall.ware.dao.PurchaseDao;
-import com.cy.gulimall.ware.entity.PurchaseEntity;
-import com.cy.gulimall.ware.service.PurchaseService;
-import org.springframework.transaction.annotation.Transactional;
 
 
 @Service("purchaseService")
@@ -42,7 +39,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<PurchaseEntity> page = this.page(
                 new Query<PurchaseEntity>().getPage(params),
-                new QueryWrapper<PurchaseEntity>()
+                new QueryWrapper<>()
         );
 
         return new PageUtils(page);
@@ -83,19 +80,12 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
         detailService.updateBatchById(collect);
     }
 
+    @Transactional
     @Override
     public void received(List<Long> ids) {
         // 确认采购单状态，并修改
-        List<PurchaseEntity> collect = ids.stream().map(id -> {
-            PurchaseEntity purchaseEntity = this.getById(id);
-            return purchaseEntity;
-        }).filter(item -> {
-            return item.getStatus() == WareConstant.PurchaseStatusEnum.CREATED.getCode()
-                    || item.getStatus() == WareConstant.PurchaseStatusEnum.ASSIGNED.getCode();
-        }).map(item -> {
-            item.setStatus(WareConstant.PurchaseStatusEnum.RECEIVE.getCode());
-            return item;
-        }).collect(Collectors.toList());
+        List<PurchaseEntity> collect = ids.stream().map(this::getById).filter(item -> item.getStatus() == WareConstant.PurchaseStatusEnum.CREATED.getCode()
+                || item.getStatus() == WareConstant.PurchaseStatusEnum.ASSIGNED.getCode()).peek(item -> item.setStatus(WareConstant.PurchaseStatusEnum.RECEIVE.getCode())).collect(Collectors.toList());
         this.updateBatchById(collect);
 
         // 修改采购项的状态

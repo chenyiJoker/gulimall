@@ -156,10 +156,8 @@ public class CartServiceImpl implements CartService {
     private List<CartItem> getCartItems(String cartKey) {
         BoundHashOperations<String, Object, Object> hashOps = redisTemplate.boundHashOps(cartKey);
         List<Object> values = hashOps.values();
-        if (values != null && values.size() > 0) {
-            List<CartItem> collect = values.stream().map((value) -> {
-                return JSON.parseObject((String) value, CartItem.class);
-            }).collect(Collectors.toList());
+        if (values != null && !values.isEmpty()) {
+            List<CartItem> collect = values.stream().map((value) -> JSON.parseObject((String) value, CartItem.class)).collect(Collectors.toList());
             return collect;
         }
         return null;
@@ -171,12 +169,11 @@ public class CartServiceImpl implements CartService {
     }
 
     // 获取到我们要操作的购物车
-
     private BoundHashOperations<String, Object, Object> getCartOps() {
         // 先得到当前用户信息
         UserInfoTo userInfoTo = CartInterceptor.threadLocal.get();
 
-        String cartKey = "";
+        String cartKey;
         if (userInfoTo.getUserId() != null) {
             // gulimall:cart:1
             cartKey = CartConstant.CART_PREFIX + userInfoTo.getUserId();
@@ -185,8 +182,6 @@ public class CartServiceImpl implements CartService {
         }
 
         // 绑定指定的key操作Redis
-        BoundHashOperations<String, Object, Object> operations = redisTemplate.boundHashOps(cartKey);
-
-        return operations;
+        return redisTemplate.boundHashOps(cartKey);
     }
 }

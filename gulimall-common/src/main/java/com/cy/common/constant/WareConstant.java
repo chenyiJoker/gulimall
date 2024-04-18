@@ -1,6 +1,9 @@
 package com.cy.common.constant;
 
+import lombok.Getter;
+
 public class WareConstant {
+    @Getter
     public enum PurchaseStatusEnum {
         CREATED(0, "新建"), ASSIGNED(1, "已分配"),
 
@@ -16,15 +19,9 @@ public class WareConstant {
             this.msg = msg;
         }
 
-        public int getCode() {
-            return code;
-        }
-
-        public String getMsg() {
-            return msg;
-        }
     }
 
+    @Getter
     public enum PurchaseDetailStatusEnum {
         CREATED(0, "新建"), ASSIGNED(1, "已分配"),
 
@@ -40,12 +37,5 @@ public class WareConstant {
             this.msg = msg;
         }
 
-        public int getCode() {
-            return code;
-        }
-
-        public String getMsg() {
-            return msg;
-        }
     }
 }

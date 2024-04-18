@@ -1,7 +1,6 @@
 package com.cy.gulimall.search.config;
 
 import org.apache.http.HttpHost;
-import org.elasticsearch.client.HttpAsyncResponseConsumerFactory;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -24,11 +23,8 @@ public class ESConfig {
 
     @Bean
     public RestHighLevelClient restHighLevelClient() {
-        RestHighLevelClient client = new RestHighLevelClient(
+        return new RestHighLevelClient(
                 RestClient.builder(
                         new HttpHost("192.168.71.128", 9200, "http")));
-        return client;
-
     }
 }
-

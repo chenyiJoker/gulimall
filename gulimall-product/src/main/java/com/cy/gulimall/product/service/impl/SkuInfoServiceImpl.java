@@ -1,14 +1,20 @@
 package com.cy.gulimall.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.cy.gulimall.product.entity.*;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.cy.common.utils.PageUtils;
+import com.cy.common.utils.Query;
+import com.cy.gulimall.product.dao.SkuInfoDao;
+import com.cy.gulimall.product.entity.SkuImagesEntity;
+import com.cy.gulimall.product.entity.SkuInfoEntity;
+import com.cy.gulimall.product.entity.SpuInfoDescEntity;
 import com.cy.gulimall.product.service.*;
 import com.cy.gulimall.product.vo.SkuItemVo;
-import com.cy.gulimall.product.vo.Skus;
-import com.mysql.cj.x.protobuf.MysqlxDatatypes;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,17 +22,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.cy.common.utils.PageUtils;
-import com.cy.common.utils.Query;
-
-import com.cy.gulimall.product.dao.SkuInfoDao;
-import com.cy.gulimall.product.entity.SkuInfoEntity;
-import org.springframework.util.StringUtils;
 
 
 @Service("skuInfoService")
@@ -50,7 +45,7 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<SkuInfoEntity> page = this.page(
                 new Query<SkuInfoEntity>().getPage(params),
-                new QueryWrapper<SkuInfoEntity>()
+                new QueryWrapper<>()
         );
 
         return new PageUtils(page);
@@ -66,9 +61,7 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
         LambdaQueryWrapper<SkuInfoEntity> queryWrapper = new LambdaQueryWrapper<>();
         String key = (String) params.get("key");
         if (StringUtils.hasText(key)) {
-            queryWrapper.and(obj -> {
-                obj.eq(SkuInfoEntity::getSkuId, key).or().like(SkuInfoEntity::getSkuName, key);
-            });
+            queryWrapper.and(obj -> obj.eq(SkuInfoEntity::getSkuId, key).or().like(SkuInfoEntity::getSkuName, key));
         }
 
         String catelogId = (String) params.get("catelogId");
@@ -83,7 +76,7 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
         String max = (String) params.get("max");
         if (StringUtils.hasText(max)) {
             BigDecimal bigDecimal = new BigDecimal(max);
-            if (bigDecimal.compareTo(BigDecimal.ZERO) == 1) {
+            if (bigDecimal.compareTo(BigDecimal.ZERO) > 0) {
                 queryWrapper.le(SkuInfoEntity::getPrice, max);
             }
         }
@@ -138,6 +131,4 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
 
         return skuItemVo;
     }
-
-
 }

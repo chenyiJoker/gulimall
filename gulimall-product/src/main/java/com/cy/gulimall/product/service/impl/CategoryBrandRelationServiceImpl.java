@@ -1,27 +1,25 @@
 package com.cy.gulimall.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.cy.common.utils.PageUtils;
+import com.cy.common.utils.Query;
 import com.cy.gulimall.product.dao.BrandDao;
+import com.cy.gulimall.product.dao.CategoryBrandRelationDao;
 import com.cy.gulimall.product.dao.CategoryDao;
 import com.cy.gulimall.product.entity.BrandEntity;
+import com.cy.gulimall.product.entity.CategoryBrandRelationEntity;
 import com.cy.gulimall.product.entity.CategoryEntity;
 import com.cy.gulimall.product.service.BrandService;
+import com.cy.gulimall.product.service.CategoryBrandRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.cy.common.utils.PageUtils;
-import com.cy.common.utils.Query;
-
-import com.cy.gulimall.product.dao.CategoryBrandRelationDao;
-import com.cy.gulimall.product.entity.CategoryBrandRelationEntity;
-import com.cy.gulimall.product.service.CategoryBrandRelationService;
 
 
 @Service("categoryBrandRelationService")
@@ -39,7 +37,7 @@ public class CategoryBrandRelationServiceImpl extends ServiceImpl<CategoryBrandR
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<CategoryBrandRelationEntity> page = this.page(
                 new Query<CategoryBrandRelationEntity>().getPage(params),
-                new QueryWrapper<CategoryBrandRelationEntity>()
+                new QueryWrapper<>()
         );
 
         return new PageUtils(page);

@@ -1,26 +1,23 @@
 package com.cy.gulimall.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.cy.gulimall.product.service.CategoryBrandRelationService;
-import com.cy.gulimall.product.vo.BrandVo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cy.common.utils.PageUtils;
 import com.cy.common.utils.Query;
-
 import com.cy.gulimall.product.dao.BrandDao;
 import com.cy.gulimall.product.entity.BrandEntity;
 import com.cy.gulimall.product.service.BrandService;
+import com.cy.gulimall.product.service.CategoryBrandRelationService;
+import com.cy.gulimall.product.vo.BrandVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service("brandService")

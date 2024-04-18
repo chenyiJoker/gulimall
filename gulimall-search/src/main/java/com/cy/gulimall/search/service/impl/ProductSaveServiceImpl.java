@@ -39,9 +39,7 @@ public class ProductSaveServiceImpl implements ProductSaveService {
         BulkResponse bulk = restHighLevelClient.bulk(bulkRequest, ESConfig.COMMON_OPTIONS);
 
         //TODO 如果批量错误
-        List<String> collect = Arrays.stream(bulk.getItems()).map(item -> {
-            return item.getId();
-        }).collect(Collectors.toList());
+        List<String> collect = Arrays.stream(bulk.getItems()).map(BulkItemResponse::getId).collect(Collectors.toList());
         log.info("商品上架成果{}", collect);
 
         return bulk.hasFailures();

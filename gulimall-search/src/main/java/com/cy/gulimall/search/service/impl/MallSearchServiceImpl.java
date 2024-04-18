@@ -22,8 +22,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.nested.ParsedNested;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedLongTerms;
@@ -54,7 +54,7 @@ public class MallSearchServiceImpl implements MallSearchService {
 
     @Override
     public SearchResult search(SearchParam param) {
-        SearchResult result = null;
+        SearchResult result;
 
         SearchRequest searchRequest = buildSearchRequest(param);
 
@@ -73,7 +73,7 @@ public class MallSearchServiceImpl implements MallSearchService {
         SearchHits hits = response.getHits();
         // 1.查询到的商品
         List<SkuEsModel> esModels = new ArrayList<>();
-        if (hits.getHits() != null && hits.getHits().length > 0) {
+        if (hits.getHits() != null) {
             for (SearchHit hit : hits.getHits()) {
                 String sourceAsString = hit.getSourceAsString();
                 SkuEsModel esModel = JSON.parseObject(sourceAsString, SkuEsModel.class);
@@ -100,7 +100,7 @@ public class MallSearchServiceImpl implements MallSearchService {
             // 3.属性的所有值
             ParsedStringTerms attrValueAgg = bucket.getAggregations().get("attr_value_agg");
 
-            List<String> attrValues = attrValueAgg.getBuckets().stream().map(item -> item.getKeyAsString()).collect(Collectors.toList());
+            List<String> attrValues = attrValueAgg.getBuckets().stream().map(MultiBucketsAggregation.Bucket::getKeyAsString).collect(Collectors.toList());
 
             attrVo.setAttrValue(attrValues);
             attrVos.add(attrVo);
@@ -155,7 +155,7 @@ public class MallSearchServiceImpl implements MallSearchService {
         result.setPageNavs(pageNavs);
 
         // 6.构建面包屑导航功能
-        if (param.getAttrs() != null && param.getAttrs().size() > 0) {
+        if (param.getAttrs() != null && !param.getAttrs().isEmpty()) {
             List<SearchResult.NavVo> navVos = param.getAttrs().stream().map(attr -> {
                 SearchResult.NavVo navVo = new SearchResult.NavVo();
                 String[] s = attr.split("_");
@@ -178,7 +178,7 @@ public class MallSearchServiceImpl implements MallSearchService {
             }).collect(Collectors.toList());
             result.setNavs(navVos);
         }
-        if (param.getBrandId() != null && param.getBrandId().size() > 0) {
+        if (param.getBrandId() != null && !param.getBrandId().isEmpty()) {
             List<SearchResult.NavVo> navs = result.getNavs();
             SearchResult.NavVo navVo = new SearchResult.NavVo();
 
@@ -190,7 +190,7 @@ public class MallSearchServiceImpl implements MallSearchService {
                 StringBuffer buffer = new StringBuffer();
                 String replace = "";
                 for (BrandVo brandVo : brand) {
-                    buffer.append(brandVo.getBrandName() + ";");
+                    buffer.append(brandVo.getBrandName()).append(";");
                     replace = replaceQueryString(param, brandVo.getBrandId() + "", "brandId");
                 }
                 navVo.setNavValue(buffer.toString());
@@ -203,15 +203,14 @@ public class MallSearchServiceImpl implements MallSearchService {
     }
 
     private static String replaceQueryString(SearchParam param, String value, String key) {
-        String encode = null;
+        String encode;
         try {
             encode = URLEncoder.encode(value, "UTF-8");
             encode = encode.replace("+", "%20");
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-        String replace = param.get_queryString().replace("&" + key + "=" + encode, "");
-        return replace;
+        return param.get_queryString().replace("&" + key + "=" + encode, "");
     }
 
     // 准备检索请求
@@ -230,12 +229,12 @@ public class MallSearchServiceImpl implements MallSearchService {
         }
 
         // 品牌id
-        if (param.getBrandId() != null && param.getBrandId().size() > 0) {
+        if (param.getBrandId() != null && !param.getBrandId().isEmpty()) {
             boolQuery.filter(QueryBuilders.termsQuery("brandId", param.getBrandId()));
         }
 
         // 所有指定的属性
-        if (param.getAttrs() != null && param.getAttrs().size() > 0) {
+        if (param.getAttrs() != null && !param.getAttrs().isEmpty()) {
             for (String attr : param.getAttrs()) {
                 BoolQueryBuilder nesteBoolQuery = QueryBuilders.boolQuery();
 
@@ -324,8 +323,6 @@ public class MallSearchServiceImpl implements MallSearchService {
 
         System.out.println(searchSource);
 
-        SearchRequest searchRequest = new SearchRequest(new String[]{EsConstant.PRODUCT_INDEX}, searchSource);
-
-        return searchRequest;
+        return new SearchRequest(new String[]{EsConstant.PRODUCT_INDEX}, searchSource);
     }
 }

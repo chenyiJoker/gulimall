@@ -1,10 +1,18 @@
 package com.cy.gulimall.coupon.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cy.common.to.MemberPrice;
 import com.cy.common.to.SkuReductionTo;
+import com.cy.common.utils.PageUtils;
+import com.cy.common.utils.Query;
+import com.cy.gulimall.coupon.dao.SkuFullReductionDao;
 import com.cy.gulimall.coupon.entity.MemberPriceEntity;
+import com.cy.gulimall.coupon.entity.SkuFullReductionEntity;
 import com.cy.gulimall.coupon.entity.SkuLadderEntity;
 import com.cy.gulimall.coupon.service.MemberPriceService;
+import com.cy.gulimall.coupon.service.SkuFullReductionService;
 import com.cy.gulimall.coupon.service.SkuLadderService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +22,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.cy.common.utils.PageUtils;
-import com.cy.common.utils.Query;
-
-import com.cy.gulimall.coupon.dao.SkuFullReductionDao;
-import com.cy.gulimall.coupon.entity.SkuFullReductionEntity;
-import com.cy.gulimall.coupon.service.SkuFullReductionService;
 
 
 @Service("skuFullReductionService")
@@ -38,7 +36,7 @@ public class SkuFullReductionServiceImpl extends ServiceImpl<SkuFullReductionDao
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<SkuFullReductionEntity> page = this.page(
                 new Query<SkuFullReductionEntity>().getPage(params),
-                new QueryWrapper<SkuFullReductionEntity>()
+                new QueryWrapper<>()
         );
 
         return new PageUtils(page);
@@ -59,7 +57,7 @@ public class SkuFullReductionServiceImpl extends ServiceImpl<SkuFullReductionDao
         SkuFullReductionEntity fullReductionEntity = new SkuFullReductionEntity();
         BeanUtils.copyProperties(skuReductionTo, fullReductionEntity);
         fullReductionEntity.setAddOther(skuReductionTo.getPriceStatus());
-        if (skuReductionTo.getFullPrice().compareTo(BigDecimal.ZERO) == 1) {
+        if (skuReductionTo.getFullPrice().compareTo(BigDecimal.ZERO) > 0) {
             this.save(fullReductionEntity);
         }
 
@@ -74,9 +72,7 @@ public class SkuFullReductionServiceImpl extends ServiceImpl<SkuFullReductionDao
             memberPriceEntity.setMemberLevelName(item.getName());
 
             return memberPriceEntity;
-        }).filter(item -> {
-            return item.getMemberPrice().compareTo(BigDecimal.ZERO) == 1;
-        }).collect(Collectors.toList());
+        }).filter(item -> item.getMemberPrice().compareTo(BigDecimal.ZERO) > 0).collect(Collectors.toList());
 
         memberPriceService.saveBatch(collect);
     }

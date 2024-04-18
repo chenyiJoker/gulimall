@@ -43,7 +43,7 @@ public class Cart {
 
     public Integer getCountNum() {
         int count = 0;
-        if (items != null && items.size() > 0) {
+        if (items != null && !items.isEmpty()) {
             for (CartItem item : items) {
                 count += item.getCount();
             }
@@ -53,7 +53,7 @@ public class Cart {
 
     public Integer getCountType() {
         int count = 0;
-        if (items != null && items.size() > 0) {
+        if (items != null && !items.isEmpty()) {
             for (CartItem item : items) {
                 count += 1;
             }

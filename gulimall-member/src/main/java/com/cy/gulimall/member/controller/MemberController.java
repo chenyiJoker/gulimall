@@ -1,22 +1,21 @@
 package com.cy.gulimall.member.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
 import com.cy.common.exception.BizCodeEnume;
+import com.cy.common.utils.PageUtils;
+import com.cy.common.utils.R;
+import com.cy.gulimall.member.entity.MemberEntity;
 import com.cy.gulimall.member.exception.PhoneExistException;
 import com.cy.gulimall.member.exception.UserNameExistException;
 import com.cy.gulimall.member.feign.CouponFeignService;
+import com.cy.gulimall.member.service.MemberService;
 import com.cy.gulimall.member.vo.MemberLoginVo;
 import com.cy.gulimall.member.vo.MemberRegisterVo;
 import com.cy.gulimall.member.vo.SocialUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.cy.gulimall.member.entity.MemberEntity;
-import com.cy.gulimall.member.service.MemberService;
-import com.cy.common.utils.PageUtils;
-import com.cy.common.utils.R;
+import java.util.Arrays;
+import java.util.Map;
 
 
 
@@ -70,7 +69,7 @@ public class MemberController {
     @RequestMapping("coupon")
     public R test() {
         MemberEntity memberEntity = new MemberEntity();
-        memberEntity.setNickname("陈毅");
+        memberEntity.setNickname("endure");
         R membercoupon = couponFeignService.membercoupon();
         return R.ok().put("member", memberEntity).put("coupon", membercoupon.get("coupon"));
     }

@@ -1,26 +1,23 @@
 package com.cy.gulimall.ware.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.cy.common.utils.R;
-import com.cy.gulimall.ware.feign.ProductFeignService;
-import com.cy.gulimall.ware.vo.SkuHasStockVo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cy.common.utils.PageUtils;
 import com.cy.common.utils.Query;
-
+import com.cy.common.utils.R;
 import com.cy.gulimall.ware.dao.WareSkuDao;
 import com.cy.gulimall.ware.entity.WareSkuEntity;
+import com.cy.gulimall.ware.feign.ProductFeignService;
 import com.cy.gulimall.ware.service.WareSkuService;
+import com.cy.gulimall.ware.vo.SkuHasStockVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service("wareSkuService")
@@ -53,7 +50,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         queryWrapper.eq(WareSkuEntity::getSkuId, skuId);
         queryWrapper.eq(WareSkuEntity::getWareId, wareId);
         List<WareSkuEntity> entities = baseMapper.selectList(queryWrapper);
-        if (entities == null || entities.size() == 0) {
+        if (!entities.isEmpty()) {
             WareSkuEntity wareSkuEntity = new WareSkuEntity();
             wareSkuEntity.setSkuId(skuId);
             wareSkuEntity.setWareId(wareId);
@@ -66,7 +63,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
                 if (info.getCode() == 0) {
                     wareSkuEntity.setSkuName((String) map.get("skuName"));
                 }
-            } catch (Exception e) {
+            } catch (Exception ignored) {
 
             }
             baseMapper.insert(wareSkuEntity);

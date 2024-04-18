@@ -3,7 +3,15 @@ package com.cy.gulimall.product.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.cy.common.utils.PageUtils;
+import com.cy.common.utils.Query;
+import com.cy.gulimall.product.dao.CategoryDao;
+import com.cy.gulimall.product.entity.CategoryEntity;
 import com.cy.gulimall.product.service.CategoryBrandRelationService;
+import com.cy.gulimall.product.service.CategoryService;
 import com.cy.gulimall.product.vo.Catelog2Vo;
 import org.redisson.api.RLock;
 import org.redisson.api.RReadWriteLock;
@@ -13,21 +21,11 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.cy.common.utils.PageUtils;
-import com.cy.common.utils.Query;
-
-import com.cy.gulimall.product.dao.CategoryDao;
-import com.cy.gulimall.product.entity.CategoryEntity;
-import com.cy.gulimall.product.service.CategoryService;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 
 @Service("categoryService")
@@ -46,7 +44,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<CategoryEntity> page = this.page(
                 new Query<CategoryEntity>().getPage(params),
-                new QueryWrapper<CategoryEntity>()
+                new QueryWrapper<>()
         );
 
         return new PageUtils(page);
@@ -81,7 +79,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         List<Long> parentPath = findParentPath(catelogId, paths);
         Collections.reverse(parentPath);
 
-        return parentPath.toArray(new Long[parentPath.size()]);
+        return parentPath.toArray(new Long[0]);
     }
 
     @CacheEvict(value = "catagory", allEntries = true)
@@ -121,10 +119,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                     Catelog2Vo catelog2Vo = new Catelog2Vo(v.getCatId().toString(), null, l2.getCatId().toString(), l2.getName());
                     List<CategoryEntity> entities = getCategoryEntities(selectList, l2.getCatId());
                     if (entities != null) {
-                        List<Catelog2Vo.Catelog3Vo> collect = entities.stream().map(l3 -> {
-                            Catelog2Vo.Catelog3Vo catelog3Vo = new Catelog2Vo.Catelog3Vo(l2.getCatId().toString(), l3.getCatId().toString(), l3.getName());
-                            return catelog3Vo;
-                        }).collect(Collectors.toList());
+                        List<Catelog2Vo.Catelog3Vo> collect = entities
+                                .stream().map(l3 -> new Catelog2Vo.Catelog3Vo(l2.getCatId().toString(), l3.getCatId().toString(), l3.getName())).collect(Collectors.toList());
                         catelog2Vo.setCatalog3List(collect);
                     }
                     return catelog2Vo;
@@ -150,7 +146,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
         RLock rLock = readWriteLock.readLock();
 
-        Map<String, List<Catelog2Vo>> dataFromDb = null;
+        Map<String, List<Catelog2Vo>> dataFromDb;
         try {
             rLock.lock();
             //加锁成功...执行业务
@@ -177,8 +173,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                     List<CategoryEntity> entities = getCategoryEntities(selectList, l2.getCatId());
                     if (entities != null) {
                         List<Catelog2Vo.Catelog3Vo> collect = entities.stream().map(l3 -> {
-                            Catelog2Vo.Catelog3Vo catelog3Vo = new Catelog2Vo.Catelog3Vo(l2.getCatId().toString(), l3.getCatId().toString(), l3.getName());
-                            return catelog3Vo;
+                            return new Catelog2Vo.Catelog3Vo(l2.getCatId().toString(), l3.getCatId().toString(), l3.getName());
                         }).collect(Collectors.toList());
                         catelog2Vo.setCatalog3List(collect);
                     }

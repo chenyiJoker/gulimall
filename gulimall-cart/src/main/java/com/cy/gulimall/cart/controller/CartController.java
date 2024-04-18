@@ -1,6 +1,5 @@
 package com.cy.gulimall.cart.controller;
 
-import com.cy.common.constant.AuthServerConstant;
 import com.cy.gulimall.cart.service.CartService;
 import com.cy.gulimall.cart.vo.Cart;
 import com.cy.gulimall.cart.vo.CartItem;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -26,11 +24,9 @@ public class CartController {
     @GetMapping(value = "/currentUserCartItems")
     @ResponseBody
     public List<CartItem> getCurrentCartItems() {
-
-        List<CartItem> cartItemVoList = cartService.getUserCartItems();
-
-        return cartItemVoList;
+        return cartService.getUserCartItems();
     }
+
     @GetMapping("/cart.html")
     public String cartListPage(Model model) throws ExecutionException, InterruptedException {
         Cart cart = cartService.getCart();
