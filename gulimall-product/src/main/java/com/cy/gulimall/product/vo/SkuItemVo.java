@@ -26,8 +26,9 @@ public class SkuItemVo {
     //5、获取spu的规格参数信息
     private List<SpuItemAttrGroupVo> groupAttrs;
 
-    //    //6、秒杀商品的优惠信息
-    //    private SeckillSkuVo seckillSkuVo;
+    //6、秒杀商品的优惠信息
+    private SeckillSkuVo seckillSkuVo;
+
     @Data
     public static class SkuItemSaleAttrVo {
         private Long attrId;
@@ -44,6 +45,7 @@ public class SkuItemVo {
         private List<Attr> attrs;
 
     }
+
     @Data
     public static class AttrValueWithSkuIdVo {
 

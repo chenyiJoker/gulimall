@@ -1,19 +1,14 @@
 package com.cy.gulimall.order.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.cy.gulimall.order.entity.OrderEntity;
-import com.cy.gulimall.order.service.OrderService;
 import com.cy.common.utils.PageUtils;
 import com.cy.common.utils.R;
+import com.cy.gulimall.order.entity.OrderEntity;
+import com.cy.gulimall.order.service.OrderService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.Map;
 
 
 
@@ -29,6 +24,18 @@ import com.cy.common.utils.R;
 public class OrderController {
     @Autowired
     private OrderService orderService;
+
+    @PostMapping("/listWithItem")
+    public R listWithItem(@RequestBody Map<String, Object> params){
+        PageUtils page = orderService.queryPageWithItem(params);
+        return R.ok().put("page", page);
+    }
+
+    @GetMapping("/status/{orderSn}")
+    public R getOrderStatus(@PathVariable("orderSn") String orderSn) {
+        OrderEntity orderEntity = orderService.getOrderStatus(orderSn);
+        return R.ok().setData(orderEntity);
+    }
 
     /**
      * 列表

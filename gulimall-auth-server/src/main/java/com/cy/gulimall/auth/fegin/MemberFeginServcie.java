@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient("gulimall-member")
 public interface MemberFeginServcie {
     @PostMapping("/member/member/regist")
-    public R register(@RequestBody UserRegistVo vo);
+    R register(@RequestBody UserRegistVo vo);
     @PostMapping("/member/member/login")
-    public R login(@RequestBody UserLoginVo vo);
+    R login(@RequestBody UserLoginVo vo);
 
     @PostMapping("/member/member/oauth2/login")
-    public R oauthLogin(@RequestBody SocialUser user);
+    R oauthLogin(@RequestBody SocialUser user);
 }

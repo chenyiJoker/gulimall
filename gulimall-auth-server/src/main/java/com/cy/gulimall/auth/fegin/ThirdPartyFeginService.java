@@ -8,5 +8,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient("gulimall-third-party")
 public interface ThirdPartyFeginService {
     @GetMapping("/sms/sendCode")
-    public R sendSmsCode(@RequestParam("phone") String phone, @RequestParam("code") String code);
+    R sendSmsCode(@RequestParam("phone") String phone, @RequestParam("code") String code);
 }

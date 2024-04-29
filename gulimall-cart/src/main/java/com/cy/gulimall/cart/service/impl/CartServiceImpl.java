@@ -165,7 +165,14 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public List<CartItem> getUserCartItems() {
-        return null;
+        UserInfoTo userInfoTo = CartInterceptor.threadLocal.get();
+        if (userInfoTo == null) {
+            return null;
+        } else {
+            String cartKey = CartConstant.CART_PREFIX + userInfoTo.getUserId();
+            return getCartItems(cartKey).stream().filter(CartItem::getCheck)
+                    .peek((cartItem) -> cartItem.setPrice(productFeignService.getPrice(cartItem.getSkuId()))).collect(Collectors.toList());
+        }
     }
 
     // 获取到我们要操作的购物车

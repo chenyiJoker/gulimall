@@ -1,19 +1,16 @@
 package com.cy.gulimall.member.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.cy.gulimall.member.entity.MemberReceiveAddressEntity;
-import com.cy.gulimall.member.service.MemberReceiveAddressService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.cy.common.utils.PageUtils;
 import com.cy.common.utils.R;
+import com.cy.gulimall.member.entity.MemberReceiveAddressEntity;
+import com.cy.gulimall.member.service.MemberReceiveAddressService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 
 
@@ -29,6 +26,12 @@ import com.cy.common.utils.R;
 public class MemberReceiveAddressController {
     @Autowired
     private MemberReceiveAddressService memberReceiveAddressService;
+
+    @GetMapping("{memberId}/addresses")
+    public List<MemberReceiveAddressEntity> getAddress(@PathVariable("memberId") Long memberId) {
+        return memberReceiveAddressService.list(new LambdaQueryWrapper<MemberReceiveAddressEntity>()
+                .eq(MemberReceiveAddressEntity::getMemberId, memberId));
+    }
 
     /**
      * 列表

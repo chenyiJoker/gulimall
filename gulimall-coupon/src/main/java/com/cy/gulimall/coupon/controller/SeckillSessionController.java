@@ -1,19 +1,15 @@
 package com.cy.gulimall.coupon.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.cy.gulimall.coupon.entity.SeckillSessionEntity;
-import com.cy.gulimall.coupon.service.SeckillSessionService;
 import com.cy.common.utils.PageUtils;
 import com.cy.common.utils.R;
+import com.cy.gulimall.coupon.entity.SeckillSessionEntity;
+import com.cy.gulimall.coupon.service.SeckillSessionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 
 
@@ -29,6 +25,12 @@ import com.cy.common.utils.R;
 public class SeckillSessionController {
     @Autowired
     private SeckillSessionService seckillSessionService;
+
+    @GetMapping(value = "/coupon/seckillsession/Lates3DaySession")
+    public R getLates3DaySession(){
+        List<SeckillSessionEntity> sessionEntities = seckillSessionService.getLates3DaySession();
+        return R.ok().setData(sessionEntities);
+    }
 
     /**
      * 列表

@@ -1,10 +1,12 @@
 package com.cy.gulimall.ware.controller;
 
+import com.cy.common.exception.NoStockException;
 import com.cy.common.utils.PageUtils;
 import com.cy.common.utils.R;
 import com.cy.gulimall.ware.entity.WareSkuEntity;
 import com.cy.gulimall.ware.service.WareSkuService;
 import com.cy.gulimall.ware.vo.SkuHasStockVo;
+import com.cy.gulimall.ware.vo.WareSkuLockVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +28,16 @@ import java.util.Map;
 public class WareSkuController {
     @Autowired
     private WareSkuService wareSkuService;
+
+    @PostMapping("/lock/order")
+    public R orderLockStock(@RequestBody WareSkuLockVo vo) {
+        try {
+            Boolean stockResults = wareSkuService.orderLockStock(vo);
+            return R.ok().setData(stockResults);
+        } catch (NoStockException e) {
+            return R.error();
+        }
+    }
 
     // 判断sku是否有库存
     @PostMapping("/hasstock")

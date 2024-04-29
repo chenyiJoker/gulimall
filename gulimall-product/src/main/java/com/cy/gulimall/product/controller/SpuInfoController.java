@@ -1,16 +1,15 @@
 package com.cy.gulimall.product.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
+import com.cy.common.utils.PageUtils;
+import com.cy.common.utils.R;
+import com.cy.gulimall.product.entity.SpuInfoEntity;
+import com.cy.gulimall.product.service.SpuInfoService;
 import com.cy.gulimall.product.vo.SpuSaveVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.cy.gulimall.product.entity.SpuInfoEntity;
-import com.cy.gulimall.product.service.SpuInfoService;
-import com.cy.common.utils.PageUtils;
-import com.cy.common.utils.R;
+import java.util.Arrays;
+import java.util.Map;
 
 
 
@@ -26,6 +25,12 @@ import com.cy.common.utils.R;
 public class SpuInfoController {
     @Autowired
     private SpuInfoService spuInfoService;
+
+    @GetMapping("skuId/{id}")
+    public R getSpuInfoBySkuId(@PathVariable("id") Long id) {
+        SpuInfoEntity spuInfo = spuInfoService.getSpuInfoBySkuId(id);
+        return R.ok().setData(spuInfo);
+    }
 
     // /product/spuinfo/{spuId}/up
     // 商品上架
